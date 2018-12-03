@@ -1,3 +1,4 @@
+// Unit tests for redis methods.
 package redisCache
 
 import (
