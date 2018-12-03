@@ -8,8 +8,6 @@ The API receives one or more medallions and return how many trips each medallion
 Considering that the query creates a heavy load on the database, the results must be cached.
 The API allows user to ask for fresh data, ignoring the cache.
 
-KINDLY NOTE: Assumptions are highlighted as ***ASSUMPTION***
-
 Directory Structure:
 --------------------
 ```
