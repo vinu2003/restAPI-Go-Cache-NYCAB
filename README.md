@@ -95,3 +95,42 @@ Improve the error handling mechanism - for now it wraps the error from external 
 This can be even more simplefied and logs as well.
 
 
+sample tests: Using curl
+------------------------
+
+vinodhinis-MBP:restAPI-Go-Cache-NYCAB vinodhinibalusamy$ curl -X GET -v "http://localhost:8984/cab/trips?medallion=D7D598CD99978BD012A87A76A7C891B7,F81EBC0D7805F6AF3E7C57038C951D4B&date=2pCache=false"
+Note: Unnecessary use of -X or --request, GET is already inferred.
+*   Trying 127.0.0.1...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 8984 (#0)
+> GET /cab/trips?medallion=D7D598CD99978BD012A87A76A7C891B7,F81EBC0D7805F6AF3E7C57038C951D4B&date=2013-12-01&skipCache=false HTTP/1.1
+> Host: localhost:8984
+> User-Agent: curl/7.54.0
+> Accept: */*
+> 
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=utf-8
+< Date: Mon, 03 Dec 2018 11:43:12 GMT
+< Content-Length: 106
+< 
+{
+  	"D7D598CD99978BD012A87A76A7C891B7": "3",
+  	"F81EBC0D7805F6AF3E7C57038C951D4B": "Data not found."
+}
+vinodhinis-MBP:restAPI-Go-Cache-NYCAB vinodhinibalusamy$
+vinodhinis-MBP:restAPI-Go-Cache-NYCAB vinodhinibalusamy$ curl PUT -v "http://localhost:8984/cab/clearcache"
+*   Trying 127.0.0.1...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 8984 (#0)
+> PUT /cab/clearcache HTTP/1.1
+> Host: localhost:8984
+> User-Agent: curl/7.54.0
+> Accept: */*
+> 
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=utf-8
+< Date: Mon, 03 Dec 2018 11:43:08 GMT
+< Content-Length: 13
+< 
+
+
