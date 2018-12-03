@@ -74,7 +74,7 @@ IF the cache is not found then handler read from DB.
 if skipCache is true - always read from DB.
 
 However, when if skipCache is true(explicitly) or if the page is first time fetched by user(fresh fetch) or page not found in cache so server reads from DB - for all these cases update cache for that particular key.
-DEFAULT CACHE time: 15s in main.go.
+DEFAULT CACHE time: 15s in main.go @@LINE79.
 
 Keep it simple and user friendly.
 Given medallion and dates provided or their combinations not found update the output as "Data not found."
