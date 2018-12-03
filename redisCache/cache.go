@@ -52,7 +52,7 @@ func (s *Store) Set(key string, content []byte, duration time.Duration) (r.Statu
 
 	// nil doesnt mean it is an Error. It can be OK.
 	if cmdStatus != nil && !(strings.Contains(cmdStatus.String(), "OK")) {
-		return *cmdStatus, errors.New(fmt.Sprintf("ERROR: Redis SET %v",cmdStatus.Err()))
+		return *cmdStatus, errors.New(fmt.Sprintf("ERROR: Redis SET %v", cmdStatus.Err()))
 	}
 
 	return *cmdStatus, nil
@@ -62,7 +62,7 @@ func (s *Store) Set(key string, content []byte, duration time.Duration) (r.Statu
 func (s *Store) FlushDB() (r.StatusCmd, error) {
 	cmdStatus := s.client.FlushDb()
 	if cmdStatus != nil && !(strings.Contains(cmdStatus.String(), "OK")) {
-		return *cmdStatus, errors.New(fmt.Sprintf("ERROR: Redis FlushDB %v",cmdStatus.Err()))
+		return *cmdStatus, errors.New(fmt.Sprintf("ERROR: Redis FlushDB %v", cmdStatus.Err()))
 	}
 
 	return *cmdStatus, nil

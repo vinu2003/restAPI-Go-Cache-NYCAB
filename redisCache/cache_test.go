@@ -14,7 +14,7 @@ func parse(s string) time.Duration {
 }
 
 func TestWrongURL(t *testing.T) {
-	storage, err := NewStorage("wrong://wtf")
+	storage, err := NewStorage("http://abcd")
 	if err == nil || storage != nil {
 		t.Fail()
 	}
@@ -40,6 +40,18 @@ func TestGetExpiredValue(t *testing.T) {
 	storage, _ := NewStorage(redisURL)
 	storage.Set("MY_KEY", []byte("123456"), parse("1s"))
 	time.Sleep(parse("1s"))
+	content, _ := storage.Get("MY_KEY")
+
+	assertContentEquals(t, content, []byte(""))
+}
+
+func TestStore_FlushDB(t *testing.T) {
+	storage, _ := NewStorage(redisURL)
+	storage.Set("MY_KEY", []byte("123456"), parse("50s"))
+
+	// flush
+	storage.FlushDB()
+
 	content, _ := storage.Get("MY_KEY")
 
 	assertContentEquals(t, content, []byte(""))

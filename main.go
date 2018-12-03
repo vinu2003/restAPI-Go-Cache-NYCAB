@@ -99,7 +99,7 @@ func (env *Env) CabTripsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var (
-		result map[string]int
+		result map[string]string
 		err    error
 	)
 	result, err = env.db.GetTrips(medallionArr, date)
