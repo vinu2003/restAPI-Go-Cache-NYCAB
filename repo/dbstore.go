@@ -1,3 +1,4 @@
+// methods that query Database.
 package repo
 
 import (
