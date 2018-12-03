@@ -1,3 +1,4 @@
+// Entery point for API - init, routers, handlers.
 package main
 
 import (
@@ -24,7 +25,7 @@ type Env struct {
 
 const (
 	dbName = "mysqld@localhost"
-	dbPass = "safeinJesus123"
+	dbPass = "United123"
 	dbHost = "localhost"
 	dbPort = "3306"
 )
