@@ -1,4 +1,4 @@
-// cache implements redis get/set functionalities.
+// cache implements redis get/set flush functionalities.
 package redisCache
 
 import (
