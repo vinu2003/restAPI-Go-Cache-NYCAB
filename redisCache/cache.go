@@ -2,18 +2,18 @@
 package redisCache
 
 import (
+	"errors"
 	"fmt"
 	r "gopkg.in/redis.v5"
-	"log"
 	"strings"
 	"time"
 )
 
-//Storage mecanism for caching strings.
+//Storage mechanism for caching strings.
 type Storage interface {
-	Get(key string) []byte
-	Set(key string, content []byte, duration time.Duration)
-	FlushDB() r.StatusCmd
+	Get(key string) ([]byte, error)
+	Set(key string, content []byte, duration time.Duration) (r.StatusCmd, error)
+	FlushDB() (r.StatusCmd, error)
 }
 
 // Storage mechanism for caching strings.
@@ -28,7 +28,7 @@ func NewStorage(url string) (*Store, error) {
 		err  error
 	)
 	if opts, err = r.ParseURL(url); err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("ERROR: Redis URL parsing %v", err))
 	}
 
 	fmt.Println("NewStorage : ", opts)
@@ -38,33 +38,32 @@ func NewStorage(url string) (*Store, error) {
 }
 
 // Get a cached content by key.
-func (s *Store) Get(key string) []byte {
+func (s *Store) Get(key string) ([]byte, error) {
 	val, err := s.client.Get("_PAGE_CACHE_" + key).Bytes()
 	if err == nil && len(val) == 0 {
-		log.Println("GET error: key doesn't exists :", err)
+		return nil, errors.New(fmt.Sprintf("ERROR: Redis SET %v", err))
 	}
-	return val
+	return val, nil
 }
 
 // Set a cached content by key.
-func (s *Store) Set(key string, content []byte, duration time.Duration) {
-	err := s.client.Set("_PAGE_CACHE_"+key, content, duration)
+func (s *Store) Set(key string, content []byte, duration time.Duration) (r.StatusCmd, error) {
+	cmdStatus := s.client.Set("_PAGE_CACHE_"+key, content, duration)
+
 	// nil doesnt mean it is an Error. It can be OK.
-	if err != nil && !(strings.Contains(err.String(), "OK")) {
-		log.Println("SET Error: ", err)
-	} else if strings.Contains(err.String(), "OK") {
-		log.Println(err.String())
+	if cmdStatus != nil && !(strings.Contains(cmdStatus.String(), "OK")) {
+		return *cmdStatus, errors.New(fmt.Sprintf("ERROR: Redis SET %v",cmdStatus.Err()))
 	}
+
+	return *cmdStatus, nil
 }
 
 // FlushDB.
-func (s *Store) FlushDB() r.StatusCmd {
-	err := s.client.FlushDb()
-	if err != nil && !(strings.Contains(err.String(), "OK")) {
-		log.Println("FlushDB Error: ", err)
-	} else if strings.Contains(err.String(), "OK") {
-		log.Println(err.String())
+func (s *Store) FlushDB() (r.StatusCmd, error) {
+	cmdStatus := s.client.FlushDb()
+	if cmdStatus != nil && !(strings.Contains(cmdStatus.String(), "OK")) {
+		return *cmdStatus, errors.New(fmt.Sprintf("ERROR: Redis FlushDB %v",cmdStatus.Err()))
 	}
 
-	return *err
+	return *cmdStatus, nil
 }

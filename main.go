@@ -86,10 +86,17 @@ func (env *Env) CabTripsHandler(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(2 * time.Second)
 	queryVals := r.URL.Query()
 	medallionArg := queryVals.Get("medallion")
-
+	if len(medallionArg) == 0 {
+		http.Error(w, "Error: No medallion value provided", http.StatusUnprocessableEntity)
+		return
+	}
 	medallionArr := strings.Split(medallionArg, ",")
 
 	date := queryVals.Get("date")
+	if date == "" {
+		http.Error(w, "Error: No date value provided", http.StatusUnprocessableEntity)
+		return
+	}
 
 	var (
 		result map[string]int
@@ -106,10 +113,11 @@ func (env *Env) CabTripsHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handler to flush the DB cache.
 func (env *Env) ClearCacheHandler(w http.ResponseWriter, r *http.Request) {
-	err := storage.FlushDB()
-	if err.Err() != nil {
-		http.Error(w, err.String(), http.StatusInternalServerError)
+	status, err := storage.FlushDB()
+	if err != nil {
+		http.Error(w, status.String(), http.StatusInternalServerError)
+		return
 	}
 
-	writeJson(w, err.String())
+	writeJson(w, status.String())
 }

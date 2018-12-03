@@ -2,6 +2,8 @@ package repo
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"log"
 )
 
@@ -35,7 +37,7 @@ func (db *DB) GetTrips(medallion []string, date string) (map[string]int, error) 
 		err := db.QueryRow("select count(*) from cab_trip_data where medallion IN(?) and pickup_datetime LIKE(?)", medallion[i], datStr).Scan(&count)
 		if err != nil {
 			log.Println("Query failed for medallion: ", medallion[i], err)
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("Error: Query failed for medallion:%v - :%v", medallion[i], err))
 		}
 		result[medallion[i]] = count
 	}

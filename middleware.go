@@ -21,11 +21,16 @@ func invokeHandler(w http.ResponseWriter, r *http.Request, handler func(w http.R
 	w.WriteHeader(c.Code)
 	content := c.Body.Bytes()
 
+	// Whenever there is a new read from database  *update* the cache for that particluar key.
 	if d, err := time.ParseDuration(duration); err == nil {
-		fmt.Printf("New page cached: %s for %s\n", r.RequestURI, duration)
-		storage.Set(r.RequestURI, content, d)
+		status, err := storage.Set(r.RequestURI, content, d)
+		if err != nil {
+			http.Error(w, status.String(), http.StatusExpectationFailed)
+		} else {
+			w.Header().Add("Cache Status", fmt.Sprintf("New page cached: %s for %s\n", r.RequestURI, duration))
+		}
 	} else {
-		fmt.Printf("Page not cached. err: %s\n", err)
+		log.Println("Page not cached. err: ", err)
 	}
 
 	w.Write(content)
@@ -33,7 +38,6 @@ func invokeHandler(w http.ResponseWriter, r *http.Request, handler func(w http.R
 
 func cached(duration string, handler func(w http.ResponseWriter, r *http.Request)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("RequestURI:", r.RequestURI)
 		queryVals := r.URL.Query()
 
 		var cache bool
@@ -41,29 +45,24 @@ func cached(duration string, handler func(w http.ResponseWriter, r *http.Request
 		if strings.Contains(cacheArg, "true") || strings.Contains(cacheArg, "false") {
 			b, err := strconv.ParseBool(cacheArg)
 			if err != nil {
-				log.Println("INFO: Unable to Parse bool value - ", err)
-				log.Println("INFO: skipCache set to false")
 				cache = false
 			}
 			cache = b
 		} else {
-			log.Println("INFO: skipCache set to false")
 			cache = false
 		}
 
 		index := strings.Index(r.RequestURI, "&skipCache")
-		fmt.Println("index: ", index)
 		if index != -1 {
 			r.RequestURI = r.RequestURI[:index]
 		}
-		fmt.Println("New RequestURI : ", r.RequestURI)
 
 		// skipCache true, read from DB, skipping to look from cache.
 		// skipCache false, make an attempt to read from cache...
 		if !cache {
-			content := storage.Get(r.RequestURI)
+			content, _ := storage.Get(r.RequestURI)
 			if content != nil {
-				fmt.Println("Cache Hit!")
+				w.Header().Add("Status", "Cache Hit!")
 				w.Write(content)
 			} else {
 				invokeHandler(w, r, handler, duration)
